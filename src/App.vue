@@ -1,33 +1,29 @@
 <script setup lang="ts">
-import AppSidebar from "@/components/AppSidebar.vue";
-import { Textarea } from "@/components/ui/textarea";
-import {
-    Breadcrumb,
-    BreadcrumbItem,
-    BreadcrumbLink,
-    BreadcrumbList,
-    BreadcrumbPage,
-    BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
-import { Separator } from "@/components/ui/separator";
-import {
-    SidebarInset,
-    SidebarProvider,
-    SidebarTrigger,
-} from "@/components/ui/sidebar";
-import { Button } from "@/components/ui/button";
-import tables_component from "@/components/tables.vue";
-
-import { useSQLite } from "@/composables/useSQLite";
 import { ref, onMounted } from "vue";
+
+import { useSqlStore } from "@/state/useSqlStore";
+// UI components
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import mainlayout from "@/components/mainlayout.vue";
+
+//slotted Components
+import tables_component from "@/components/tables.vue";
+import result from "@/components/result.vue";
+
+// composables
+import { useSQLite } from "@/composables/useSQLite";
 
 const { isLoading, error, executeQuery } = useSQLite();
 const sqlQuery = ref("SELECT * FROM test_table");
+
 const queryResult = ref<any[]>([]);
 const queryError = ref<string | null>(null);
-
 let table_error = ref<string | null>(null);
 let table_result = ref<any[]>([]);
+let success = ref<boolean>(false);
+let store = useSqlStore();
+let logs = ref<string[]>([]);
 
 // Predefined example queries for testing
 const exampleQueries = [
@@ -46,6 +42,8 @@ const exampleQueries = [
     },
 ];
 
+//functions
+//
 async function runQuery() {
     queryError.value = null;
     queryResult.value = [];
@@ -54,9 +52,16 @@ async function runQuery() {
         const result = await executeQuery(sqlQuery.value);
         queryResult.value = result.result.resultRows;
         loadtables();
+
+        store.addLog({ success: true, sql: result.result.sql });
     } catch (err) {
         queryError.value =
             err instanceof Error ? err.message : "An error occurred";
+        store.addLog({
+            success: false,
+            sql: sqlQuery.value,
+            error: err.message,
+        });
     }
 }
 
@@ -73,127 +78,72 @@ async function loadtables() {
         const result = await executeQuery(sql);
         // resultRows is an array of objects if rowMode: "object" is set
         table_result.value = result?.result?.resultRows ?? [];
-        console.log("Tables:", table_result.value);
+        const tables: Array<{ name: string; columns: Array<string> }> = [];
+        for (const table of table_result.value) {
+            const result = await executeQuery(
+                `PRAGMA table_info(${table.name})`,
+            );
+            // resultRows is an array of objects if rowMode: "object" is set
+
+            console.log(`${table.name}:`, result?.result?.resultRows);
+        }
     } catch (err: any) {
         table_error.value =
             err?.result?.message ?? err?.message ?? "An error occurred";
         console.error("Error loading tables:", table_error.value);
     }
 }
+
 onMounted(async () => {
     await loadtables();
 });
 </script>
+
 <template>
-    <SidebarProvider :style="{ '--sidebar-width': '19rem' }">
-        <AppSidebar />
-        <SidebarInset>
-            <header class="flex h-16 shrink-0 items-center gap-2 px-4">
-                <SidebarTrigger class="-ml-1" />
-                <Separator
-                    orientation="vertical"
-                    class="mr-2 data-[orientation=vertical]:h-4"
-                />
-                <Breadcrumb>
-                    <BreadcrumbList>
-                        <BreadcrumbItem class="hidden md:block">
-                            <BreadcrumbLink href="#">
-                                Building Your Application
-                            </BreadcrumbLink>
-                        </BreadcrumbItem>
-                    </BreadcrumbList>
-                </Breadcrumb>
-            </header>
-            <div class="flex flex-1 flex-col gap-4 p-4 pt-0">
-                <div class="grid auto-rows-min gap-4 md:grid-cols-2">
-                    <div class="bg-muted/50 aspect-video rounded-xl p-4">
-                        <h2 class="text-2xl font-bold">SQLite Playground</h2>
-
-                        <!-- Example queries -->
-                        <div class="mt-4">
-                            <h3 class="text-sm font-medium">
-                                Example Queries:
-                            </h3>
-                            <div class="mt-2 flex gap-2">
-                                <Button
-                                    variant="outline"
-                                    v-for="example in exampleQueries"
-                                    :key="example.title"
-                                    @click="sqlQuery = example.query"
-                                >
-                                    {{ example.title }}
-                                </Button>
-                            </div>
-                        </div>
-
-                        <!-- Query input -->
-                        <div class="mt-6">
-                            <Textarea
-                                v-model="sqlQuery"
-                                rows="4"
-                                class="w-full rounded-lg px-4 py-3 font-mono text-sm"
-                                :disabled="isLoading"
-                            />
-                            <button
-                                :disabled="isLoading"
-                                class="mt-2 rounded-lg bg-blue-600 px-4 py-2 text-white"
-                                @click="runQuery"
-                            >
-                                {{ isLoading ? "Running..." : "Run Query" }}
-                            </button>
-                        </div>
-                        <!-- Error display -->
-                        <div
-                            v-if="error || queryError"
-                            class="mt-4 rounded-lg bg-red-50 p-4 text-red-600"
+    <div class="h-dvh w-full">
+        <mainlayout>
+            <template #input>
+                <!-- Query input -->
+                <div class="mt-6 flex flex-col gap-4">
+                    <Textarea
+                        v-model="sqlQuery"
+                        rows="10"
+                        class="w-full h-32 px-3 py-2 rounded-md font-mono text-sm"
+                        :disabled="isLoading"
+                    />
+                    <div class="mt-2">
+                        <button
+                            :disabled="isLoading"
+                            class="rounded-lg bg-blue-600 px-4 py-2 text-white"
+                            @click="runQuery"
                         >
-                            {{ error?.message || queryError }}
-                        </div>
+                            {{ isLoading ? "Running..." : "Run Query" }}
+                        </button>
                     </div>
-                    <div class="bg-muted/50 aspect-video rounded-xl p-4">
-                        <tables_component :tables="table_result" />
-                    </div>
+                </div>
+
+                <div
+                    v-if="error || queryError"
+                    class="mt-4 rounded-lg bg-red-50 p-4 text-red-600"
+                >
+                    {{ error?.message || queryError }}
                 </div>
                 <div
-                    class="bg-muted/50 min-h-[100vh] flex-1 rounded-xl md:min-h-min"
+                    v-if="success"
+                    class="mt-4 rounded-lg bg-green-50 p-4 text-green-600"
                 >
-                    <!-- Results table -->
-                    <div v-if="queryResult.length > 0" class="mt-4">
-                        <h3 class="text-lg font-semibold">Results:</h3>
-                        <div class="mt-2 overflow-x-auto">
-                            <table class="w-full">
-                                <thead>
-                                    <tr>
-                                        <th
-                                            v-for="column in Object.keys(
-                                                queryResult[0],
-                                            )"
-                                            :key="column"
-                                            class="px-4 py-2 text-left"
-                                        >
-                                            {{ column }}
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr
-                                        v-for="(row, index) in queryResult"
-                                        :key="index"
-                                    >
-                                        <td
-                                            v-for="column in Object.keys(row)"
-                                            :key="column"
-                                            class="px-4 py-2"
-                                        >
-                                            {{ row[column] }}
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+                    {{ successMessage }}
                 </div>
-            </div>
-        </SidebarInset>
-    </SidebarProvider>
+            </template>
+            <template #tables>
+                <tables_component
+                    :tables="table_result"
+                    @refresh="loadtables"
+                />
+            </template>
+            <template #result>
+                <result :queryResult="queryResult" />
+            </template>
+        </mainlayout>
+    </div>
 </template>

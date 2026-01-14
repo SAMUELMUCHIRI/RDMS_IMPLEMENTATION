@@ -20,10 +20,6 @@ import {
     SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
 
-const props = withDefaults(defineProps<SidebarProps>(), {
-    variant: "floating",
-});
-
 // This is sample data.
 const data = {
     navMain: [
@@ -69,33 +65,33 @@ const data = {
         <SidebarContent>
             <SidebarGroup>
                 <SidebarMenu class="gap-2">
-                    <SidebarMenuItem
-                        v-for="item in data.navMain"
-                        :key="item.title"
-                    >
-                        <SidebarMenuButton as-child>
-                            <a :href="item.url" class="font-medium">
-                                {{ item.title }}
-                            </a>
-                        </SidebarMenuButton>
-                        <SidebarMenuSub
-                            v-if="item.items.length"
-                            class="ml-0 border-l-0 px-1.5"
-                        >
-                            <SidebarMenuSubItem
-                                v-for="childItem in item.items"
-                                :key="childItem.title"
-                            >
-                                <SidebarMenuSubButton
-                                    as-child
-                                    :is-active="childItem.isActive"
-                                >
-                                    <a :href="childItem.url">{{
-                                        childItem.title
-                                    }}</a>
-                                </SidebarMenuSubButton>
-                            </SidebarMenuSubItem>
-                        </SidebarMenuSub>
+                    <SidebarMenuItem>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger as-child>
+                                <Button variant="outline">
+                                    <Icon
+                                        icon="radix-icons:moon"
+                                        class="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0"
+                                    />
+                                    <Icon
+                                        icon="radix-icons:sun"
+                                        class="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100"
+                                    />
+                                    <span class="sr-only">Toggle theme</span>
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                                <DropdownMenuItem @click="mode = 'light'">
+                                    Light
+                                </DropdownMenuItem>
+                                <DropdownMenuItem @click="mode = 'dark'">
+                                    Dark
+                                </DropdownMenuItem>
+                                <DropdownMenuItem @click="mode = 'auto'">
+                                    System
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
                     </SidebarMenuItem>
                 </SidebarMenu>
             </SidebarGroup>
