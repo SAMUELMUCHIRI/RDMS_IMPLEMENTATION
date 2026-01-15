@@ -16,31 +16,13 @@ import { useSQLite } from "@/composables/useSQLite";
 
 const { isLoading, error, executeQuery } = useSQLite();
 const sqlQuery = ref("SELECT * FROM test_table");
-
-const queryResult = ref<any[]>([]);
+type QueryResultRow = Record<string, any>;
+const queryResult = ref<QueryResultRow[]>([]);
 const queryError = ref<string | null>(null);
 let table_error = ref<string | null>(null);
 let table_result = ref<any[]>([]);
-let success = ref<boolean>(false);
-let store = useSqlStore();
-let logs = ref<string[]>([]);
 
-// Predefined example queries for testing
-const exampleQueries = [
-    { title: "Select all", query: "SELECT * FROM test_table" },
-    {
-        title: "Insert",
-        query: "INSERT INTO test_table (name) VALUES ('New Test Item')",
-    },
-    {
-        title: "Update",
-        query: "UPDATE test_table SET name = 'Updated Item' WHERE name LIKE 'New%'",
-    },
-    {
-        title: "Delete",
-        query: "DELETE FROM test_table WHERE name = 'Updated Item'",
-    },
-];
+let store = useSqlStore();
 
 //functions
 //
@@ -50,7 +32,11 @@ async function runQuery() {
 
     try {
         const result = await executeQuery(sqlQuery.value);
-        queryResult.value = result.result.resultRows;
+        if (result.result.resultRows) {
+            queryResult.value = result.result.resultRows as QueryResultRow[];
+        } else {
+            queryResult.value = [];
+        }
         loadtables();
 
         store.addLog({
@@ -58,13 +44,13 @@ async function runQuery() {
             sql: result.result.sql,
             timestamp: Date.now(),
         });
-    } catch (err) {
+    } catch (err: unknown) {
         queryError.value =
             err instanceof Error ? err.message : "An error occurred";
         store.addLog({
             success: false,
-            sql: sqlQuery.value,
-            error: err.message,
+            sql: sqlQuery.value as string,
+            error: err instanceof Error ? err.message : String(err),
             timestamp: Date.now(),
         });
     }
@@ -83,7 +69,7 @@ async function loadtables() {
         const result = await executeQuery(sql);
         // resultRows is an array of objects if rowMode: "object" is set
         table_result.value = result?.result?.resultRows ?? [];
-        const tables: Array<{ name: string; columns: Array<string> }> = [];
+
         for (const table of table_result.value) {
             const result = await executeQuery(
                 `PRAGMA table_info(${table.name})`,
@@ -131,12 +117,6 @@ onMounted(async () => {
                 class="mt-4 rounded-lg bg-red-50 p-4 text-red-600"
             >
                 {{ error?.message || queryError }}
-            </div>
-            <div
-                v-if="success"
-                class="mt-4 rounded-lg bg-green-50 p-4 text-green-600"
-            >
-                {{ successMessage }}
             </div>
         </template>
         <template #tables>

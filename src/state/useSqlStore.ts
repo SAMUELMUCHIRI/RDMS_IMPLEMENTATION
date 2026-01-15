@@ -1,17 +1,23 @@
 import { defineStore } from "pinia";
+type SqlLog = {
+  success: boolean;
+  sql: string;
+  timestamp: number;
+  error?: string;
+};
 
 export const useSqlStore = defineStore("sqlstore", {
   state: () => ({
-    logs: [] as object[],
+    logs: [] as SqlLog[],
   }),
 
   actions: {
-    addLog(log: object) {
+    addLog(log: SqlLog) {
       this.logs.unshift(log);
     },
   },
   getters: {
-    getLogs(): object[] {
+    getLogs(): SqlLog[] {
       return this.logs;
     },
   },

@@ -1,14 +1,10 @@
 <script setup lang="ts">
-import AppSidebar from "@/components/AppSidebar.vue";
-import commands from "@/components/sampleCommands.vue";
 import logs from "@/components/logs.vue";
-import { Textarea } from "@/components/ui/textarea";
 
 import { Separator } from "@/components/ui/separator";
 
 import { Button } from "@/components/ui/button";
 
-import result from "@/components/result.vue";
 import { Icon } from "@iconify/vue";
 import { useColorMode } from "@vueuse/core";
 
@@ -24,7 +20,9 @@ const mode = useColorMode();
 </script>
 
 <template>
-    <div class="flex h-screen w-full flex-col bg-background p-2 font-mono">
+    <div
+        class="flex h-screen w-full flex-col overflow-auto bg-background p-2 font-mono"
+    >
         <header
             class="mb-2 flex items-center gap-3 rounded-md border border-border bg-card px-4 py-2 w-full"
         >
@@ -68,10 +66,10 @@ const mode = useColorMode();
         </header>
 
         <div
-            class="grid flex-1 grid-cols-1 max-h-[calc(100svh-5rem)] grid-rows-1 md:grid-cols-2 md:grid-rows-2 gap-2 w-full"
+            class="grid flex-1 grid-cols-1 sm:max-h-[calc(100svh-5rem)] grid-rows-1 md:grid-cols-2 md:grid-rows-2 gap-2 w-full"
         >
             <div
-                class="flex flex-col overflow-hidden rounded-md border border-border bg-card"
+                class="flex flex-col min-h-[200px] overflow-hidden rounded-md border flex-1 border-border bg-card"
             >
                 <div
                     class="flex items-center gap-2 border-b border-border bg-secondary px-3 py-2"

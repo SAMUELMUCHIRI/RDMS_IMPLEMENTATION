@@ -2,19 +2,19 @@
 import {
     Table,
     TableBody,
-    TableCaption,
     TableCell,
-    TableFooter,
     TableHead,
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-defineProps<{
+import type { PropType } from "vue";
+type QueryResultRow = Record<string, any>;
+defineProps({
     queryResult: {
-        type: any[];
-        required: true;
-    };
-}>();
+        type: Array as PropType<QueryResultRow[]>,
+        required: true,
+    },
+});
 </script>
 <template>
     <div
@@ -39,7 +39,7 @@ defineProps<{
                 <TableHeader>
                     <TableRow>
                         <TableHead
-                            v-for="column in Object.keys(queryResult[0])"
+                            v-for="column in Object.keys(queryResult[0]!)"
                             :key="column"
                         >
                             <span class="pb-2 pr-4">{{ column }}</span>

@@ -1,15 +1,19 @@
 <script setup lang="ts">
+import type { PropType } from "vue";
 import { Button } from "@/components/ui/button";
+type Table = {
+    name: string;
+};
 defineProps({
     tables: {
-        type: Array,
+        type: Array as PropType<Table[]>,
         required: true,
     },
 });
 </script>
 <template>
     <div
-        class="flex flex-col overflow-hidden rounded-md border border-border bg-card"
+        class="flex flex-col overflow-hidden rounded-md border border-border bg-card max-h-[20vh] sm:max-h-[75vh]"
     >
         <div
             class="flex items-center justify-between border-b border-border bg-secondary px-3 py-2"

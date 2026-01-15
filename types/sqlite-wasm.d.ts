@@ -47,6 +47,7 @@ declare module "@sqlite.org/sqlite-wasm" {
         dbId?: DbId;
         bind?: unknown[];
         returnValue?: string;
+        rowMode?: string;
       };
       result: {
         dbId: DbId;
@@ -54,6 +55,7 @@ declare module "@sqlite.org/sqlite-wasm" {
         bind: unknown[];
         returnValue: string;
         resultRows?: unknown[][];
+        rowMode?: string;
       };
     };
   };

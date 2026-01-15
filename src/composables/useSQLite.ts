@@ -92,11 +92,11 @@ export function useSQLite() {
       }
 
       return result;
-    } catch (err) {
-      console.error(err.result.message);
-
+    } catch (err: any) {
       error.value =
-        err instanceof Error ? err : new Error(`${err.result.message}`);
+        err instanceof Error
+          ? err
+          : new Error(`${err.result.message as string}`);
       throw error.value;
     } finally {
       isLoading.value = false;

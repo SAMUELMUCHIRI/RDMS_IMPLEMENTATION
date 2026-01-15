@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ScrollArea } from "@/components/ui/scroll-area";
+
 import { Separator } from "@/components/ui/separator";
 
 import { useSqlStore } from "@/state/useSqlStore";
@@ -19,19 +19,19 @@ let store = useSqlStore();
             >
         </div>
         <div class="flex-1 overflow-y-auto p-3 text-xs ">
-            <div v-for="log in store.getLogs" class="text-muted-foreground">
-                <div class="flex items-center text-sm">
+            <div v-for="log  in store.getLogs" class="text-muted-foreground">
+                <div class="flex items-center text-sm p-1 gap-2">
                 <span class="text-muted-foreground">[{{ new Date(log.timestamp).toLocaleTimeString() }}]</span>
                 <div v-if="log.success" class="text-sm text-green-500">
-                    <span class="p-2">{{ log.sql }}</span>
+                    <span >{{ log.sql }}</span>
                 </div>
-                <div v-else class="text-sm text-red-500">
-                    <span class="p-2">{{ log.sql }}</span>
-                    <span class="p-2">{{ log.error }}</span>
+                <div v-else class="text-sm  text-red-500 flex flex-col">
+                    <span >{{ log.sql }}</span>
+                    <span >{{ log.error }}</span>
                 </div>
 
                 </div>
-                <Separator class="my-2" />
+                <Separator class="my-1" />
             </div>
         </div>
     </div>
