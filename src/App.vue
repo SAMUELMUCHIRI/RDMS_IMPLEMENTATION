@@ -4,7 +4,7 @@ import { ref, onMounted } from "vue";
 import { useSqlStore } from "@/state/useSqlStore";
 // UI components
 import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
+
 import mainlayout from "@/components/mainlayout.vue";
 
 //slotted Components
@@ -53,7 +53,11 @@ async function runQuery() {
         queryResult.value = result.result.resultRows;
         loadtables();
 
-        store.addLog({ success: true, sql: result.result.sql });
+        store.addLog({
+            success: true,
+            sql: result.result.sql,
+            timestamp: Date.now(),
+        });
     } catch (err) {
         queryError.value =
             err instanceof Error ? err.message : "An error occurred";
@@ -61,6 +65,7 @@ async function runQuery() {
             success: false,
             sql: sqlQuery.value,
             error: err.message,
+            timestamp: Date.now(),
         });
     }
 }
@@ -100,50 +105,45 @@ onMounted(async () => {
 </script>
 
 <template>
-    <div class="h-dvh w-full">
-        <mainlayout>
-            <template #input>
-                <!-- Query input -->
-                <div class="mt-6 flex flex-col gap-4">
-                    <Textarea
-                        v-model="sqlQuery"
-                        rows="10"
-                        class="w-full h-32 px-3 py-2 rounded-md font-mono text-sm"
-                        :disabled="isLoading"
-                    />
-                    <div class="mt-2">
-                        <button
-                            :disabled="isLoading"
-                            class="rounded-lg bg-blue-600 px-4 py-2 text-white"
-                            @click="runQuery"
-                        >
-                            {{ isLoading ? "Running..." : "Run Query" }}
-                        </button>
-                    </div>
-                </div>
-
-                <div
-                    v-if="error || queryError"
-                    class="mt-4 rounded-lg bg-red-50 p-4 text-red-600"
-                >
-                    {{ error?.message || queryError }}
-                </div>
-                <div
-                    v-if="success"
-                    class="mt-4 rounded-lg bg-green-50 p-4 text-green-600"
-                >
-                    {{ successMessage }}
-                </div>
-            </template>
-            <template #tables>
-                <tables_component
-                    :tables="table_result"
-                    @refresh="loadtables"
+    <mainlayout>
+        <template #input>
+            <!-- Query input -->
+            <div class="mt-6 flex flex-col gap-4">
+                <Textarea
+                    v-model="sqlQuery"
+                    rows="10"
+                    class="w-full h-32 px-3 py-2 rounded-md font-mono text-sm"
+                    :disabled="isLoading"
                 />
-            </template>
-            <template #result>
-                <result :queryResult="queryResult" />
-            </template>
-        </mainlayout>
-    </div>
+                <div class="mt-2">
+                    <button
+                        :disabled="isLoading"
+                        class="rounded-lg bg-blue-600 px-4 py-2 text-white"
+                        @click="runQuery"
+                    >
+                        {{ isLoading ? "Running..." : "Run Query" }}
+                    </button>
+                </div>
+            </div>
+
+            <div
+                v-if="error || queryError"
+                class="mt-4 rounded-lg bg-red-50 p-4 text-red-600"
+            >
+                {{ error?.message || queryError }}
+            </div>
+            <div
+                v-if="success"
+                class="mt-4 rounded-lg bg-green-50 p-4 text-green-600"
+            >
+                {{ successMessage }}
+            </div>
+        </template>
+        <template #tables>
+            <tables_component :tables="table_result" @refresh="loadtables" />
+        </template>
+        <template #result>
+            <result :queryResult="queryResult" />
+        </template>
+    </mainlayout>
 </template>

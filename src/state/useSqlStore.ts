@@ -7,7 +7,7 @@ export const useSqlStore = defineStore("sqlstore", {
 
   actions: {
     addLog(log: object) {
-      this.logs.push(log);
+      this.logs.unshift(log);
     },
   },
   getters: {
