@@ -1,5 +1,55 @@
-# Vue 3 + TypeScript + Vite
+# **RDBMS IMPLEMENTATION**
+- Tools (VUE | SQLITE | WEB WORKERS | ORIGIN PRIVATE FILE SYSTEM)
 
-This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+### HOW IT WORKS
+- SQLite Wasm: SQLite converted to run in browsers
+- Web Workers: Runs database code without freezing your app
+- Origin Private File System: A secure place to store your database
 
-Learn more about the recommended Project Setup and IDE Support in the [Vue Docs TypeScript Guide](https://vuejs.org/guide/typescript/overview.html#project-setup).
+```bash
+
++--------------------------------------------------+
+|                    Browser                       |
+|                                                  |
+|                +-------------+                   |
+|                |   Vue UI    |                   |
+|                +-------------+                   |
+|                     |   ^                        |
+|               Async |   | Response               |
+|                     v   |                        |
+|                +-------------+                   |
+|                | Web Worker |                   |
+|                +-------------+                   |
+|                     |   ^                        |
+|                Query |   | Results               |
+|                     v   |                        |
+|             +-------------------+                |
+|             |   SQLite WASM     |                |
+|             +-------------------+                |
+|                     |   ^                        |
+|                     |   | Data                   |
+|                     v   |                        |
+|                +-------------+                   |
+|                |    OPFS     |                   |
+|                +-------------+                   |
+|                                                  |
++--------------------------------------------------+
+
+```
+*Figure: How SQLite runs in your browser*
+<br>
+Application User Interface (UI)
+[![ui](public/ui.png)
+*Figure: Application User Interface (UI)*
+<br>
+
+## Installation
+- Download or clone the repository
+- Install dependencies using npm or yarn or pnpm
+```bash
+pnpm install
+```
+- Start the development server
+```bash
+pnpm run dev
+```
